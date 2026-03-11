@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VOCALC — Voice Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,30 +34,20 @@
     position: relative;
   }
 
-  /* Scanline overlay */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.08) 2px,
-      rgba(0,0,0,0.08) 4px
-    );
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
     pointer-events: none;
     z-index: 100;
   }
 
-  /* Grid background */
   body::after {
     content: '';
     position: fixed;
     inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
@@ -66,39 +56,31 @@
   .container {
     position: relative;
     z-index: 10;
-    width: 480px;
+    width: 500px;
     max-width: 96vw;
   }
 
-  /* Header */
   .header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
   }
 
   .logo {
     font-family: 'Orbitron', sans-serif;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 900;
     color: var(--accent);
     letter-spacing: 4px;
     text-shadow: var(--glow);
   }
+  .logo span { color: var(--accent2); text-shadow: var(--glow2); }
 
-  .logo span {
-    color: var(--accent2);
-    text-shadow: var(--glow2);
-  }
-
-  .version {
-    font-size: 11px;
-    color: var(--dim);
-    letter-spacing: 2px;
-  }
+  .version { font-size: 10px; color: var(--dim); letter-spacing: 2px; }
 
   .status-dot {
     width: 8px; height: 8px;
@@ -106,119 +88,137 @@
     background: var(--dim);
     margin-left: auto;
     transition: all 0.3s;
-    box-shadow: none;
   }
-  .status-dot.active {
-    background: var(--accent3);
-    box-shadow: 0 0 10px var(--accent3);
-    animation: pulse 1s ease-in-out infinite;
-  }
-  .status-dot.processing {
-    background: var(--accent2);
-    box-shadow: 0 0 10px var(--accent2);
+  .status-dot.active { background: var(--accent3); box-shadow: 0 0 10px var(--accent3); animation: pulse 1s ease-in-out infinite; }
+  .status-dot.processing { background: var(--accent2); box-shadow: 0 0 10px var(--accent2); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Language Selector */
+  .lang-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+  .lang-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--panel);
+    color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
   }
+  .lang-btn:hover { border-color: var(--accent); color: var(--text); }
+  .lang-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,255,0.06);
+    box-shadow: inset 0 0 12px rgba(0,229,255,0.05);
+  }
+  .lang-btn .ar-label { font-family: 'Cairo', sans-serif; font-size: 12px; display: block; }
 
-  /* Main display */
+  /* Display panel */
   .display-panel {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 20px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     position: relative;
     overflow: hidden;
   }
-
   .display-panel::before {
     content: 'DISPLAY';
     position: absolute;
     top: 8px; left: 12px;
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 3px;
+    font-size: 9px; color: var(--dim); letter-spacing: 3px;
   }
 
+  .corner-decoration { position: absolute; width: 16px; height: 16px; }
+  .corner-decoration::before, .corner-decoration::after { content:''; position:absolute; background:var(--accent); opacity:0.5; }
+  .corner-tl { top:0; left:0; }
+  .corner-tl::before { top:0; left:0; width:16px; height:1px; }
+  .corner-tl::after  { top:0; left:0; width:1px; height:16px; }
+  .corner-br { bottom:0; right:0; }
+  .corner-br::before { bottom:0; right:0; width:16px; height:1px; }
+  .corner-br::after  { bottom:0; right:0; width:1px; height:16px; }
+
   .transcript-area {
-    min-height: 60px;
-    padding: 28px 0 8px;
+    min-height: 52px;
+    padding: 26px 0 8px;
     font-size: 13px;
     color: var(--dim);
     line-height: 1.6;
-    transition: color 0.3s;
     word-break: break-word;
   }
+  .transcript-area.has-text { color: var(--text); }
+  .transcript-area .interim { color: var(--accent); opacity: 0.7; }
+  .transcript-area.rtl { direction: rtl; text-align: right; font-family: 'Cairo', sans-serif; font-size: 15px; }
 
-  .transcript-area.has-text {
-    color: var(--text);
-  }
-
-  .transcript-area .interim {
-    color: var(--accent);
-    opacity: 0.7;
-  }
-
-  .expression-bar {
+  /* Expression bar — inline result at end */
+  .expression-row {
     margin-top: 16px;
-    padding-top: 16px;
+    padding-top: 14px;
     border-top: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 44px;
+  }
+
+  .expression-text {
     font-family: 'Orbitron', sans-serif;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--accent);
     text-shadow: var(--glow);
-    min-height: 40px;
     word-break: break-all;
     letter-spacing: 1px;
-    transition: all 0.2s;
+    flex: 1;
+    min-width: 0;
   }
-
-  .expression-bar.empty {
+  .expression-text.empty {
     color: var(--dim);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
     text-shadow: none;
     font-family: 'Share Tech Mono', monospace;
   }
 
-  .result-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    min-height: 36px;
-  }
-
-  .result-label {
-    font-size: 10px;
-    color: var(--dim);
-    letter-spacing: 2px;
-    flex-shrink: 0;
-  }
-
-  .result-value {
+  .equals-sign {
     font-family: 'Orbitron', sans-serif;
-    font-size: 28px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dim);
+    flex-shrink: 0;
+    display: none;
+  }
+
+  .inline-result {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
     font-weight: 900;
     color: var(--accent3);
-    text-shadow: 0 0 20px var(--accent3);
-    transition: all 0.3s;
-    word-break: break-all;
+    text-shadow: 0 0 18px rgba(127,255,107,0.5);
+    flex-shrink: 0;
+    display: none;
+    animation: pop 0.2s ease;
   }
 
-  .result-value.error {
-    color: var(--accent2);
-    text-shadow: var(--glow2);
-    font-size: 13px;
-    font-family: 'Share Tech Mono', monospace;
-    font-weight: 400;
+  @keyframes pop {
+    0% { transform: scale(0.88); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
   }
+
+  .inline-result.visible, .equals-sign.visible { display: block; }
 
   /* Waveform */
   .waveform-panel {
@@ -226,7 +226,7 @@
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 12px 16px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     gap: 3px;
@@ -234,14 +234,11 @@
     position: relative;
     overflow: hidden;
   }
-
   .waveform-panel::before {
     content: 'AUDIO INPUT';
     position: absolute;
     top: 6px; left: 12px;
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 3px;
+    font-size: 9px; color: var(--dim); letter-spacing: 3px;
   }
 
   .wave-bar {
@@ -250,29 +247,25 @@
     background: var(--dim);
     height: 4px;
     transition: height 0.08s ease, background 0.3s;
-    transform-origin: center;
   }
-
-  .wave-bar.active {
-    background: var(--accent);
-  }
+  .wave-bar.active { background: var(--accent); }
 
   /* Controls */
   .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 14px;
   }
 
   .btn {
-    padding: 14px 20px;
+    padding: 13px 16px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: var(--panel);
     color: var(--text);
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 2px;
     cursor: pointer;
@@ -280,16 +273,7 @@
     position: relative;
     overflow: hidden;
   }
-
-  .btn::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
+  .btn::after { content:''; position:absolute; inset:0; background:var(--accent); opacity:0; transition:opacity 0.2s; }
   .btn:hover::after { opacity: 0.07; }
   .btn:active::after { opacity: 0.15; }
 
@@ -299,182 +283,96 @@
     text-shadow: var(--glow);
     box-shadow: inset 0 0 20px rgba(0,229,255,0.05);
     grid-column: 1 / -1;
-    padding: 18px;
-    font-size: 13px;
+    padding: 16px;
+    font-size: 12px;
   }
-
   .btn-mic::after { background: var(--accent); }
-
   .btn-mic.recording {
     border-color: var(--accent2);
     color: var(--accent2);
     text-shadow: var(--glow2);
-    box-shadow: inset 0 0 20px rgba(255,107,53,0.08), 0 0 20px rgba(255,107,53,0.15);
     animation: border-pulse 1.5s ease-in-out infinite;
   }
-
   .btn-mic.recording::after { background: var(--accent2); }
-
   @keyframes border-pulse {
-    0%, 100% { box-shadow: inset 0 0 20px rgba(255,107,53,0.08), 0 0 10px rgba(255,107,53,0.1); }
-    50% { box-shadow: inset 0 0 30px rgba(255,107,53,0.15), 0 0 30px rgba(255,107,53,0.25); }
+    0%,100% { box-shadow: inset 0 0 20px rgba(255,107,53,0.08), 0 0 10px rgba(255,107,53,0.1); }
+    50%      { box-shadow: inset 0 0 30px rgba(255,107,53,0.15), 0 0 30px rgba(255,107,53,0.25); }
   }
 
   .btn-clear { border-color: #2a1a10; color: #664433; }
   .btn-clear:hover { border-color: var(--accent2); color: var(--accent2); }
 
-  .btn-copy { border-color: var(--border); }
+  .mic-icon { display:inline-block; width:13px; height:13px; vertical-align:middle; margin-right:8px; position:relative; top:-1px; }
 
   /* History */
-  .history-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .history-header {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 3px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .history-list {
-    max-height: 140px;
-    overflow-y: auto;
-  }
-
+  .history-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .history-header { padding:10px 16px; border-bottom:1px solid var(--border); font-size:9px; color:var(--dim); letter-spacing:3px; display:flex; justify-content:space-between; align-items:center; }
+  .history-list { max-height: 130px; overflow-y: auto; }
   .history-list::-webkit-scrollbar { width: 3px; }
-  .history-list::-webkit-scrollbar-track { background: transparent; }
   .history-list::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .history-item {
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(30,48,64,0.5);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    transition: background 0.2s;
-    cursor: pointer;
-    gap: 12px;
-  }
-
+  .history-item { padding:9px 16px; border-bottom:1px solid rgba(30,48,64,0.5); display:flex; justify-content:space-between; align-items:center; font-size:12px; transition:background 0.2s; cursor:pointer; gap:12px; }
   .history-item:hover { background: rgba(0,229,255,0.03); }
   .history-item:last-child { border-bottom: none; }
-
-  .history-expr { color: var(--dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .history-result { color: var(--accent3); font-family: 'Orbitron', sans-serif; font-weight: 700; flex-shrink: 0; }
-
-  .history-empty {
-    padding: 20px 16px;
-    font-size: 11px;
-    color: var(--dim);
-    text-align: center;
-  }
-
-  /* Mic icon */
-  .mic-icon {
-    display: inline-block;
-    width: 14px; height: 14px;
-    vertical-align: middle;
-    margin-right: 8px;
-    position: relative;
-    top: -1px;
-  }
+  .history-expr { color:var(--dim); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .history-result { color:var(--accent3); font-family:'Orbitron',sans-serif; font-weight:700; flex-shrink:0; }
+  .history-empty { padding:18px 16px; font-size:11px; color:var(--dim); text-align:center; }
 
   /* Tips */
-  .tips {
-    margin-top: 16px;
-    font-size: 10px;
-    color: var(--dim);
-    line-height: 1.8;
-    letter-spacing: 0.5px;
-  }
-
+  .tips { margin-top: 14px; font-size: 10px; color: var(--dim); line-height: 2; }
   .tips span { color: var(--accent); }
+  .tips.rtl { direction: rtl; text-align: right; font-family: 'Cairo', sans-serif; font-size: 12px; }
 
-  /* Notification toast */
+  /* Toast */
   .toast {
     position: fixed;
-    bottom: 30px;
-    left: 50%;
+    bottom: 30px; left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: var(--panel);
     border: 1px solid var(--border);
     padding: 10px 20px;
     border-radius: 4px;
-    font-size: 11px;
-    color: var(--accent3);
-    letter-spacing: 1px;
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 200;
-    pointer-events: none;
+    font-size: 11px; color: var(--accent3); letter-spacing: 1px;
+    opacity: 0; transition: all 0.3s;
+    z-index: 200; pointer-events: none;
   }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Unsupported message */
-  .unsupported {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--accent2);
-    font-size: 13px;
-    line-height: 1.8;
-  }
-
-  .corner-decoration {
-    position: absolute;
-    width: 16px; height: 16px;
-  }
-  .corner-decoration::before, .corner-decoration::after {
-    content: '';
-    position: absolute;
-    background: var(--accent);
-    opacity: 0.6;
-  }
-  .corner-tl { top: 0; left: 0; }
-  .corner-tl::before { top: 0; left: 0; width: 16px; height: 1px; }
-  .corner-tl::after  { top: 0; left: 0; width: 1px; height: 16px; }
-  .corner-br { bottom: 0; right: 0; }
-  .corner-br::before { bottom: 0; right: 0; width: 16px; height: 1px; }
-  .corner-br::after  { bottom: 0; right: 0; width: 1px; height: 16px; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-
 <div class="container">
+
   <div class="header">
     <div class="logo">VOC<span>ALC</span></div>
-    <div class="version">v2.1 // VOICE ENGINE</div>
+    <div class="version">v3.0 // MULTILINGUAL</div>
     <div class="status-dot" id="statusDot"></div>
   </div>
 
-  <div class="display-panel" style="position:relative">
+  <!-- Language Selector -->
+  <div class="lang-bar">
+    <button class="lang-btn active" id="lang-en" onclick="setLang('en')">ENGLISH</button>
+    <button class="lang-btn" id="lang-ar-formal" onclick="setLang('ar-formal')">
+      <span class="ar-label">عربي فصيح</span>
+    </button>
+    <button class="lang-btn" id="lang-ar-eg" onclick="setLang('ar-eg')">
+      <span class="ar-label">مصري</span>
+    </button>
+  </div>
+
+  <div class="display-panel">
     <div class="corner-decoration corner-tl"></div>
     <div class="corner-decoration corner-br"></div>
     <div class="transcript-area" id="transcriptArea">
-      <span style="color:var(--dim); font-size:12px;">— awaiting voice input —</span>
+      <span style="color:var(--dim);font-size:12px;" id="awaitMsg">— awaiting voice input —</span>
     </div>
-    <div class="expression-bar empty" id="expressionBar">expression will appear here</div>
-    <div class="result-bar">
-      <div class="result-label">RESULT</div>
-      <div class="result-value" id="resultValue" style="color:var(--dim); font-size:14px; font-family:'Share Tech Mono'; text-shadow:none; font-weight:400;">—</div>
+    <!-- Expression + inline result on same row -->
+    <div class="expression-row" id="expressionRow">
+      <div class="expression-text empty" id="expressionText">expression will appear here</div>
+      <div class="equals-sign" id="equalsSign">=</div>
+      <div class="inline-result" id="inlineResult">—</div>
     </div>
   </div>
 
-  <div class="waveform-panel" id="waveformPanel">
-    <!-- wave bars injected by JS -->
-  </div>
+  <div class="waveform-panel" id="waveformPanel"></div>
 
   <div class="controls">
     <button class="btn btn-mic" id="micBtn" onclick="toggleMic()">
@@ -484,234 +382,416 @@
       </svg>
       <span id="micLabel">ACTIVATE MICROPHONE</span>
     </button>
-    <button class="btn btn-clear" onclick="clearAll()">CLEAR</button>
-    <button class="btn btn-copy" onclick="copyResult()">COPY RESULT</button>
+    <button class="btn btn-clear" onclick="clearAll()" id="clearBtn">CLEAR</button>
+    <button class="btn" onclick="copyResult()" id="copyBtn">COPY RESULT</button>
   </div>
 
   <div class="history-panel">
     <div class="history-header">
-      <span>CALCULATION HISTORY</span>
+      <span id="histLabel">CALCULATION HISTORY</span>
       <span id="histCount" style="color:var(--accent)">0 ENTRIES</span>
     </div>
     <div class="history-list" id="historyList">
-      <div class="history-empty">no calculations yet</div>
+      <div class="history-empty" id="histEmpty">no calculations yet</div>
     </div>
   </div>
 
-  <div class="tips">
-    Say: <span>"two hundred plus forty five"</span> · <span>"fifteen percent of eighty"</span> ·
-    <span>"square root of 144"</span> · <span>"three times seven minus two"</span>
+  <div class="tips" id="tipsBox">
+    Say: <span>"two hundred plus forty five"</span> · <span>"fifteen percent of eighty"</span> · <span>"square root of 144"</span>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- Permission Help Modal -->
+<div id="permModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#0d1318;border:1px solid #ff6b35;border-radius:6px;max-width:400px;width:100%;padding:28px;font-family:'Share Tech Mono',monospace;position:relative;">
+    <div style="font-family:'Orbitron',sans-serif;font-size:12px;color:#ff6b35;letter-spacing:3px;margin-bottom:18px;">&#9888; MIC ACCESS BLOCKED</div>
+    <div style="font-size:12px;color:#c8dde8;line-height:2;">Your browser is blocking microphone access. To fix:</div>
+    <div style="margin-top:14px;font-size:11px;color:#3a5566;line-height:2.4;">
+      <div><span style="color:#00e5ff;">1.</span> Look for a lock or mic icon in your address bar</div>
+      <div><span style="color:#00e5ff;">2.</span> Click it &rarr; set Microphone to <span style="color:#7fff6b;">Allow</span></div>
+      <div><span style="color:#00e5ff;">3.</span> Reload the page and try again</div>
+      <div style="margin-top:10px;"><span style="color:#00e5ff;">Chrome:</span> Settings &rarr; Privacy &rarr; Site Settings &rarr; Mic</div>
+      <div><span style="color:#00e5ff;">Firefox:</span> Click lock in address bar &rarr; Permissions &rarr; Mic</div>
+      <div><span style="color:#00e5ff;">Safari:</span> Settings &rarr; Websites &rarr; Microphone &rarr; Allow</div>
+    </div>
+    <button onclick="closePermModal()" style="margin-top:22px;width:100%;padding:12px;background:transparent;border:1px solid #1e3040;border-radius:4px;color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;cursor:pointer;">CLOSE</button>
+  </div>
+</div>
+
 <script>
-// ─── Waveform setup ─────────────────────────────────────────────────────────
+// ─── Waveform ────────────────────────────────────────────────────────────────
 const wavePanel = document.getElementById('waveformPanel');
 const NUM_BARS = 42;
 const bars = [];
-
 for (let i = 0; i < NUM_BARS; i++) {
-  const bar = document.createElement('div');
-  bar.className = 'wave-bar';
-  wavePanel.appendChild(bar);
-  bars.push(bar);
+  const b = document.createElement('div');
+  b.className = 'wave-bar';
+  wavePanel.appendChild(b);
+  bars.push(b);
 }
-
 let waveInterval = null;
-let isRecording = false;
-
 function animateWave(active) {
   clearInterval(waveInterval);
-  if (!active) {
-    bars.forEach(b => { b.style.height = '4px'; b.classList.remove('active'); });
-    return;
-  }
+  if (!active) { bars.forEach(b => { b.style.height='4px'; b.classList.remove('active'); }); return; }
   waveInterval = setInterval(() => {
     bars.forEach((b, i) => {
-      const center = NUM_BARS / 2;
-      const dist = Math.abs(i - center) / center;
-      const base = (1 - dist) * 0.8;
-      const rand = Math.random();
-      const h = Math.max(3, Math.floor((base * rand + 0.05) * 36));
-      b.style.height = h + 'px';
-      b.classList.toggle('active', h > 10);
+      const c = NUM_BARS/2, dist = Math.abs(i-c)/c;
+      const h = Math.max(3, Math.floor(((1-dist)*0.8*Math.random()+0.05)*36));
+      b.style.height = h+'px';
+      b.classList.toggle('active', h>10);
     });
   }, 80);
 }
+animateWave(false);
 
-// ─── Word → number mapping ───────────────────────────────────────────────────
-const wordMap = {
-  zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
-  eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,
-  eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,
-  seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000,million:1000000,
-  billion:1000000000,a:1,an:1,
-  // operators
-  plus:'plus',add:'plus',added:'plus',and:'plus',
-  minus:'minus',subtract:'minus',subtracted:'minus',less:'minus',take:'minus',
-  times:'times',multiplied:'times',by:'by',x:'times',
-  divided:'divided',over:'divided',into:'divided',
-  power:'power',squared:'squared',cubed:'cubed',
-  'square root':'sqrt',sqrt:'sqrt',root:'sqrt',
-  percent:'percent',percentage:'percent',
-  of:'of',point:'point',dot:'point',
-  open:'(',close:')',parenthesis:'',bracket:'',
-  pi:'pi',e:'e',
-  equals:'=',is:'='
+// ─── Language state ───────────────────────────────────────────────────────────
+let currentLang = 'en';
+const LANGS = {
+  'en':        { code:'en-US',  rtl:false },
+  'ar-formal': { code:'ar-SA',  rtl:true  },
+  'ar-eg':     { code:'ar-EG',  rtl:true  },
 };
 
-function wordsToExpr(text) {
+const UI_STRINGS = {
+  'en': {
+    await: '— awaiting voice input —',
+    exprPlaceholder: 'expression will appear here',
+    activate: 'ACTIVATE MICROPHONE',
+    listening: 'LISTENING — CLICK TO STOP',
+    clear: 'CLEAR',
+    copy: 'COPY RESULT',
+    histLabel: 'CALCULATION HISTORY',
+    histEmpty: 'no calculations yet',
+    tips: 'Say: <span>"two hundred plus forty five"</span> · <span>"fifteen percent of eighty"</span> · <span>"square root of 144"</span>',
+    tipsRtl: false,
+  },
+  'ar-formal': {
+    await: '— في انتظار إدخال صوتي —',
+    exprPlaceholder: 'ستظهر العملية هنا',
+    activate: 'تفعيل الميكروفون',
+    listening: 'يستمع... انقر للإيقاف',
+    clear: 'مسح',
+    copy: 'نسخ النتيجة',
+    histLabel: 'سجل الحسابات',
+    histEmpty: 'لا توجد حسابات بعد',
+    tips: 'قل: <span>"مئتان زائد خمسة وأربعون"</span> · <span>"جذر مئة وأربعة وأربعون"</span> · <span>"خمسة في ثلاثة"</span>',
+    tipsRtl: true,
+  },
+  'ar-eg': {
+    await: '— استنى كلامك —',
+    exprPlaceholder: 'العملية هتظهر هنا',
+    activate: 'شغّل الميكروفون',
+    listening: 'بيسمع... اضغط للوقف',
+    clear: 'مسح',
+    copy: 'انسخ النتيجة',
+    histLabel: 'سجل الحسابات',
+    histEmpty: 'مفيش حسابات لسه',
+    tips: 'قول: <span>"مية زائد خمسة وأربعين"</span> · <span>"جذر مية وأربعة وأربعين"</span> · <span>"خمسة في تلاتة"</span>',
+    tipsRtl: true,
+  },
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('lang-'+lang).classList.add('active');
+
+  const s = UI_STRINGS[lang];
+  const rtl = LANGS[lang].rtl;
+
+  document.getElementById('awaitMsg').textContent = s.await;
+  document.getElementById('awaitMsg').style.fontFamily = rtl ? "'Cairo', sans-serif" : "'Share Tech Mono', monospace";
+  document.getElementById('expressionText').textContent = s.exprPlaceholder;
+  document.getElementById('micLabel').textContent = s.activate;
+  document.getElementById('clearBtn').textContent = s.clear;
+  document.getElementById('copyBtn').textContent = s.copy;
+  document.getElementById('histLabel').textContent = s.histLabel;
+  document.getElementById('histEmpty').textContent = s.histEmpty;
+  document.getElementById('tipsBox').innerHTML = s.tips;
+  document.getElementById('tipsBox').classList.toggle('rtl', s.tipsRtl);
+  document.getElementById('transcriptArea').classList.toggle('rtl', rtl);
+
+  if (isRecording) { stopMic(); }
+  clearAll();
+}
+
+// ─── Word → expression parsers ────────────────────────────────────────────────
+
+// English
+function wordsToExprEN(text) {
   if (!text || !text.trim()) return '';
-
   let t = text.toLowerCase()
-    .replace(/[,]/g, '')
-    .replace(/\bsquare root\b/g, 'sqrt')
-    .replace(/\bcube root\b/g, 'cbrt')
-    .replace(/\bto the power of\b/g, '^')
-    .replace(/\bto the\b/g, '^')
-    .replace(/\bsquared\b/g, '^2')
-    .replace(/\bcubed\b/g, '^3')
-    .replace(/\bhalf of\b/g, '0.5 *')
-    .replace(/\bdouble\b/g, '2 *')
-    .replace(/\btriple\b/g, '3 *')
-    .replace(/\b(\d+)\s*percent\s*of\b/g, '($1/100) *')
-    .replace(/\bpercent\s*of\b/g, '/100 *')
-    .replace(/\bpercent\b/g, '/100')
-    .replace(/\bpi\b/g, '3.14159265359')
-    .replace(/\bе\b/g, '2.71828182846');
+    .replace(/[,]/g,'')
+    .replace(/\bsquare root\b/g,'sqrt')
+    .replace(/\bcube root\b/g,'cbrt')
+    .replace(/\bto the power of\b/g,'^')
+    .replace(/\bto the\b/g,'^')
+    .replace(/\bsquared\b/g,'^2')
+    .replace(/\bcubed\b/g,'^3')
+    .replace(/\bhalf of\b/g,'0.5 *')
+    .replace(/\bdouble\b/g,'2 *')
+    .replace(/\btriple\b/g,'3 *')
+    .replace(/\b(\d+)\s*percent\s*of\b/g,'($1/100) *')
+    .replace(/\bpercent\s*of\b/g,'/100 *')
+    .replace(/\bpercent\b/g,'/100')
+    .replace(/\bpi\b/g,'3.14159265359')
+    .replace(/\bе\b/g,'2.71828182846');
 
-  // Convert number words to digits
+  const wordMap = {
+    zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
+    eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,
+    eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,
+    seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000,million:1000000,billion:1000000000,
+    a:1,an:1,
+    plus:'plus',add:'plus',added:'plus',and:'plus',
+    minus:'minus',subtract:'minus',subtracted:'minus',less:'minus',take:'minus',
+    times:'times',multiplied:'times',by:'by',x:'times',
+    divided:'divided',over:'divided',into:'divided',
+    power:'power',of:'of',point:'point',dot:'point',
+    sqrt:'sqrt',cbrt:'cbrt',
+  };
+
   const tokens = t.split(/\s+/);
-  const numbers = [];
-  let current = 0;
-  let hasNumber = false;
-  let result = [];
+  let current=0, hasNumber=false, result=[];
 
   function flushNumber() {
-    if (hasNumber) {
-      result.push(current.toString());
-      current = 0;
-      hasNumber = false;
-    }
+    if (hasNumber) { result.push(current.toString()); current=0; hasNumber=false; }
   }
 
-  for (let i = 0; i < tokens.length; i++) {
+  for (let i=0; i<tokens.length; i++) {
     const tok = tokens[i];
-    if (tok === '') continue;
-
-    // Already a digit/decimal?
-    if (/^\d+(\.\d+)?$/.test(tok)) {
-      flushNumber();
-      result.push(tok);
-      continue;
-    }
-
+    if (!tok) continue;
+    if (/^\d+(\.\d+)?$/.test(tok)) { flushNumber(); result.push(tok); continue; }
     const w = wordMap[tok];
-
     if (typeof w === 'number') {
-      if (tok === 'hundred') {
-        if (!hasNumber) { current = 1; hasNumber = true; }
-        current *= 100;
-      } else if (tok === 'thousand') {
-        if (!hasNumber) { current = 1; hasNumber = true; }
-        current *= 1000;
-      } else if (tok === 'million') {
-        if (!hasNumber) { current = 1; hasNumber = true; }
-        current *= 1000000;
-      } else if (tok === 'billion') {
-        if (!hasNumber) { current = 1; hasNumber = true; }
-        current *= 1000000000;
-      } else {
-        current += w;
-        hasNumber = true;
-      }
+      if (tok==='hundred') { if(!hasNumber){current=1;hasNumber=true;} current*=100; }
+      else if (tok==='thousand') { if(!hasNumber){current=1;hasNumber=true;} current*=1000; }
+      else if (tok==='million') { if(!hasNumber){current=1;hasNumber=true;} current*=1000000; }
+      else if (tok==='billion') { if(!hasNumber){current=1;hasNumber=true;} current*=1000000000; }
+      else { current+=w; hasNumber=true; }
     } else if (typeof w === 'string') {
       flushNumber();
-      if (w === 'plus')    result.push('+');
-      else if (w === 'minus')   result.push('-');
-      else if (w === 'times')   result.push('*');
-      else if (w === 'divided') result.push('/');
-      else if (w === 'by')      { /* skip standalone "by" */ }
-      else if (w === 'of')      result.push('*');
-      else if (w === 'power')   result.push('^');
-      else if (w === 'sqrt')    result.push('sqrt(');
-      else if (w === 'point')   {
-        // handle decimal: merge with last number
-        if (result.length && /^\d+$/.test(result[result.length-1])) {
-          result[result.length-1] += '.';
-        } else {
-          result.push('0.');
-        }
+      if (w==='plus') result.push('+');
+      else if (w==='minus') result.push('-');
+      else if (w==='times') result.push('*');
+      else if (w==='divided') result.push('/');
+      else if (w==='by') {}
+      else if (w==='of') result.push('*');
+      else if (w==='power') result.push('^');
+      else if (w==='sqrt') result.push('sqrt(');
+      else if (w==='cbrt') result.push('cbrt(');
+      else if (w==='point') {
+        if (result.length && /^\d+$/.test(result[result.length-1])) result[result.length-1]+='.';
+        else result.push('0.');
       }
-      else if (w === '=') { /* ignore */ }
     } else {
-      // try if it matches a pattern we embedded above (like sqrt, ^, etc)
-      if (['+','-','*','/','^','(',')','.'].includes(tok)) {
-        flushNumber();
-        result.push(tok);
-      } else if (tok === 'sqrt' || tok === 'cbrt') {
-        flushNumber();
-        result.push(tok + '(');
-      } else if (!['and','the','a','an','is','equals','by','of'].includes(tok)) {
-        flushNumber();
-        // pass through numbers already converted
-        if (/^\d/.test(tok)) result.push(tok);
-      }
+      if (['+','-','*','/','^','(',')','.'].includes(tok)) { flushNumber(); result.push(tok); }
+      else if (tok==='sqrt'||tok==='cbrt') { flushNumber(); result.push(tok+'('); }
     }
   }
-
   flushNumber();
 
-  let expr = result.join(' ')
-    .replace(/\s*([+\-*/^])\s*/g, ' $1 ')
-    .replace(/sqrt\s*\(\s*/g, 'sqrt(')
-    .replace(/cbrt\s*\(\s*/g, 'cbrt(')
-    .replace(/\s+/g, ' ')
+  let expr = result.join(' ').replace(/\s*([+\-*/^])\s*/g,' $1 ').replace(/\s+/g,' ').trim();
+  const opens=(expr.match(/\(/g)||[]).length, closes=(expr.match(/\)/g)||[]).length;
+  if (opens>closes) expr += ')'.repeat(opens-closes);
+  return expr;
+}
+
+// Arabic (Formal + Egyptian) — shared parser with dialect variants
+function wordsToExprAR(text, dialect) {
+  if (!text || !text.trim()) return '';
+
+  // Normalize Arabic
+  let t = text
+    .replace(/[،,]/g,'')
+    .replace(/\u0622/g,'\u0627') // أ → ا
+    .replace(/\u0623/g,'\u0627')
+    .replace(/\u0625/g,'\u0627')
+    .replace(/\u0649/g,'\u064a') // ى → ي
+    .replace(/\u0629/g,'\u0647') // ة → ه
     .trim();
 
-  // Auto-close sqrt/cbrt parens if no close paren
-  const opens = (expr.match(/\(/g) || []).length;
-  const closes = (expr.match(/\)/g) || []).length;
-  if (opens > closes) expr += ')'.repeat(opens - closes);
+  // Number word maps — formal + egyptian merged
+  const numMap = {
+    // Zero
+    'صفر':0,
+    // 1-9
+    'واحد':1,'واحده':1,'وحده':1,'اتنين':2,'اثنان':2,'اثنين':2,'تنين':2,
+    'تلاتة':3,'ثلاثة':3,'ثلاث':3,'تلات':3,
+    'اربعة':4,'أربعة':4,'اربع':4,'أربع':4,'تمانية':8,
+    'خمسة':5,'خمس':5,'ستة':6,'ست':6,'سبعة':7,'سبع':7,
+    'ثمانية':8,'ثماني':8,'تمانية':8,'تماني':8,
+    'تسعة':9,'تسع':9,
+    // 10-19
+    'عشرة':10,'عشر':10,'عشرة':10,'عشرا':10,
+    'احدى عشر':11,'أحد عشر':11,'حداشر':11,
+    'اثنا عشر':12,'اثني عشر':12,'اتناشر':12,'تناشر':12,
+    'ثلاثة عشر':13,'تلتاشر':13,
+    'اربعة عشر':14,'أربعة عشر':14,'اربعتاشر':14,
+    'خمسة عشر':15,'خمستاشر':15,
+    'ستة عشر':16,'ستاشر':16,
+    'سبعة عشر':17,'سبعتاشر':17,
+    'ثمانية عشر':18,'تمنتاشر':18,
+    'تسعة عشر':19,'تسعتاشر':19,
+    // Tens
+    'عشرون':20,'عشرين':20,'عشرون':20,
+    'ثلاثون':30,'ثلاثين':30,'تلاتين':30,
+    'اربعون':40,'أربعون':40,'اربعين':40,'أربعين':40,
+    'خمسون':50,'خمسين':50,
+    'ستون':60,'ستين':60,
+    'سبعون':70,'سبعين':70,
+    'ثمانون':80,'ثمانين':80,'تمانين':80,
+    'تسعون':90,'تسعين':90,
+    // Hundreds
+    'مئة':100,'مية':100,'ميه':100,'مائة':100,
+    'مئتان':200,'مئتين':200,'ميتين':200,'مائتان':200,
+    'ثلاثمئة':300,'تلتميه':300,'ثلاثمائة':300,
+    'اربعمئة':400,'أربعمئة':400,'اربعمية':400,
+    'خمسمئة':500,'خمسميه':500,
+    'ستمئة':600,'ستميه':600,
+    'سبعمئة':700,'سبعميه':700,
+    'ثمانمئة':800,'تمنميه':800,
+    'تسعمئة':900,'تسعميه':900,
+    'الف':1000,'ألف':1000,'آلاف':1000,
+    'مليون':1000000,
+    'مليار':1000000000,
+    // Fractions/decimal words
+    'نص':0.5,'نصف':0.5,'ربع':0.25,'ثلث':0.3333,
+  };
+
+  // Operator map
+  const opMap = {
+    'زائد':'+','زيادة':'+','جمع':'+','يجمع':'+','اجمع':'+','اضف':'+','و':'+',
+    'ناقص':'-','طرح':'-','يطرح':'-','اطرح':'-','إلا':'-',
+    'في':'*','مضروب':'*','يضرب':'*','اضرب':'*','ضرب':'*',
+    'على':'/','قسمة':'/','يقسم':'/','اقسم':'/','مقسوم':'/',
+    'اس':'^','قوة':'^','للقوة':'^','مرفوع':'^',
+    'تربيع':'^2','مربع':'^2',
+    'تكعيب':'^3','مكعب':'^3',
+    'جذر':'sqrt(','الجذر':'sqrt(',
+    'جذر تربيعي':'sqrt(',
+    'فاصلة':'.','فاصله':'.','نقطه':'.','نقطة':'.',
+    'بالمئة':'/100','بالميه':'/100','في المئة':'/100',
+    'بالمية':'/100','من المئة':'/100',
+  };
+
+  // Try to match multi-word phrases first
+  const allPhrases = Object.keys(opMap).sort((a,b)=>b.length-a.length);
+  let working = ' '+t+' ';
+
+  // Replace operator phrases with tokens
+  allPhrases.forEach(phrase => {
+    const re = new RegExp('\\s'+phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s','g');
+    working = working.replace(re, ` __OP_${opMap[phrase].replace(/[^a-zA-Z0-9+\-*/^.(]*/g,'X')}__ `);
+  });
+
+  // Now replace number words
+  const numPhrases = Object.keys(numMap).sort((a,b)=>b.length-a.length);
+  numPhrases.forEach(phrase => {
+    if (!phrase.includes(' ')) return; // multi-word first
+    const re = new RegExp('\\b'+phrase+'\\b','g');
+    working = working.replace(re, ' '+numMap[phrase]+' ');
+  });
+  numPhrases.forEach(phrase => {
+    if (phrase.includes(' ')) return;
+    const re = new RegExp('\\b'+phrase+'\\b','g');
+    working = working.replace(re, ' '+numMap[phrase]+' ');
+  });
+
+  // Now decode operator tokens
+  working = working
+    .replace(/__OP_Xsqrt\(X__/g,' sqrt(')
+    .replace(/__OP_X\^2X__/g,' ^2 ')
+    .replace(/__OP_X\^3X__/g,' ^3 ')
+    .replace(/__OP_X\^X__/g,' ^ ')
+    .replace(/__OP_X\+X__/g,' + ')
+    .replace(/__OP_X-X__/g,' - ')
+    .replace(/__OP_XX__/g,' * ')
+    .replace(/__OP_X\/X__/g,' / ')
+    .replace(/__OP_X\/100X__/g,' /100 ')
+    .replace(/__OP_X\.X__/g,' . ')
+    .replace(/__OP_[^_]+__/g,' ');
+
+  // Clean up and parse numbers
+  let tokens = working.trim().split(/\s+/).filter(Boolean);
+  let result = [];
+  let acc = null;
+
+  for (let i=0; i<tokens.length; i++) {
+    const tok = tokens[i];
+    if (/^-?\d+(\.\d+)?$/.test(tok)) {
+      const n = parseFloat(tok);
+      if (acc === null) acc = n;
+      else acc += n; // accumulate: مئة وعشرة = 100 + 10
+    } else if (['+','-','*','/','^','(',')','.'].includes(tok) || tok.startsWith('sqrt')) {
+      if (acc !== null) { result.push(acc.toString()); acc=null; }
+      result.push(tok);
+    } else if (tok === '/100') {
+      if (acc !== null) { result.push(acc.toString()); acc=null; }
+      result.push('/100');
+    } else if (tok === '^2' || tok === '^3') {
+      if (acc !== null) { result.push(acc.toString()); acc=null; }
+      result.push(tok);
+    } else {
+      // skip unrecognized
+    }
+  }
+  if (acc !== null) result.push(acc.toString());
+
+  let expr = result.join(' ')
+    .replace(/\s*([+\-*/^])\s*/g,' $1 ')
+    .replace(/sqrt\s*\(/g,'sqrt(')
+    .replace(/\s+/g,' ')
+    .trim();
+
+  // Auto-close parens
+  const opens=(expr.match(/\(/g)||[]).length, closes=(expr.match(/\)/g)||[]).length;
+  if (opens>closes) expr += ')'.repeat(opens-closes);
 
   return expr;
 }
 
+function wordsToExpr(text) {
+  if (currentLang === 'en') return wordsToExprEN(text);
+  return wordsToExprAR(text, currentLang);
+}
+
+// ─── Evaluator ────────────────────────────────────────────────────────────────
 function evalExpr(expr) {
   if (!expr) return null;
   try {
-    // Replace ^ with ** for JS eval
     let e = expr
-      .replace(/\^/g, '**')
-      .replace(/sqrt\(([^)]+)\)/g, (_, n) => `Math.sqrt(${n})`)
-      .replace(/cbrt\(([^)]+)\)/g, (_, n) => `Math.cbrt(${n})`);
-    // Safety check: only allow math chars
+      .replace(/\^/g,'**')
+      .replace(/sqrt\(([^)]+)\)/g,(_,n)=>`Math.sqrt(${n})`)
+      .replace(/cbrt\(([^)]+)\)/g,(_,n)=>`Math.cbrt(${n})`);
     if (/[^0-9+\-*/.() %MathsqrtcbepiwPI\s]/.test(e)) return null;
     const r = Function('"use strict"; return (' + e + ')')();
     if (!isFinite(r)) return null;
-    // Format: up to 10 sig digits, remove trailing zeros
     return parseFloat(r.toPrecision(10)).toString();
   } catch { return null; }
 }
 
-// ─── Speech Recognition ──────────────────────────────────────────────────────
+// ─── Speech Recognition ───────────────────────────────────────────────────────
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
+let isRecording = false;
+let recognitionError = false;
 let history = [];
 
-const micBtn = document.getElementById('micBtn');
-const micLabel = document.getElementById('micLabel');
-const statusDot = document.getElementById('statusDot');
+const micBtn       = document.getElementById('micBtn');
+const micLabel     = document.getElementById('micLabel');
+const statusDot    = document.getElementById('statusDot');
 const transcriptArea = document.getElementById('transcriptArea');
-const expressionBar = document.getElementById('expressionBar');
-const resultValue = document.getElementById('resultValue');
-const historyList = document.getElementById('historyList');
-const histCount = document.getElementById('histCount');
+const expressionText = document.getElementById('expressionText');
+const equalsSign   = document.getElementById('equalsSign');
+const inlineResult = document.getElementById('inlineResult');
+const historyList  = document.getElementById('historyList');
+const histCount    = document.getElementById('histCount');
 
 if (!SpeechRecognition) {
-  micBtn.innerHTML = '<span>⚠ SPEECH API NOT SUPPORTED — USE CHROME/EDGE</span>';
+  micBtn.innerHTML = '<span>&#9888; SPEECH API NOT SUPPORTED — USE CHROME/EDGE</span>';
   micBtn.disabled = true;
   micBtn.style.opacity = '0.4';
 }
@@ -720,106 +800,79 @@ function setupRecognition() {
   recognition = new SpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
-  recognition.lang = 'en-US';
+  recognition.lang = LANGS[currentLang].code;
 
   recognition.onstart = () => {
     isRecording = true;
     animateWave(true);
     statusDot.className = 'status-dot active';
     micBtn.classList.add('recording');
-    micLabel.textContent = 'LISTENING — CLICK TO STOP';
+    micLabel.textContent = UI_STRINGS[currentLang].listening;
   };
 
   recognition.onend = () => {
-    // Only auto-restart if we intended to keep recording AND no error occurred
     if (isRecording && !recognitionError) {
-      try { recognition.start(); } catch(e) { /* already restarting */ }
+      try { recognition.start(); } catch(e) {}
     }
   };
 
   recognition.onerror = (e) => {
     recognitionError = true;
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      stopMic();
-      showPermissionHelp();
-    } else if (e.error === 'audio-capture') {
-      stopMic();
-      showToast('NO MICROPHONE DETECTED — CHECK YOUR DEVICE');
-    } else if (e.error === 'network') {
-      stopMic();
-      showToast('NETWORK ERROR — CHECK CONNECTION');
-    } else if (e.error === 'aborted') {
-      // Ignore — this fires when we manually stop
-    } else {
-      stopMic();
-      showToast('MIC ERROR: ' + e.error.toUpperCase());
-    }
+    if (e.error==='not-allowed'||e.error==='service-not-allowed') { stopMic(); showPermissionHelp(); }
+    else if (e.error==='audio-capture') { stopMic(); showToast('NO MICROPHONE DETECTED'); }
+    else if (e.error==='network') { stopMic(); showToast('NETWORK ERROR'); }
+    else if (e.error==='aborted') {}
+    else { stopMic(); showToast('MIC ERROR: '+e.error.toUpperCase()); }
   };
 
   recognition.onresult = (event) => {
     statusDot.className = 'status-dot processing';
+    let interim = '', final = '';
 
-    let interim = '';
-    let final = '';
-
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        final += transcript + ' ';
-      } else {
-        interim += transcript;
-      }
+    for (let i=event.resultIndex; i<event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t+' ';
+      else interim += t;
     }
 
-    // Accumulate finals
-    if (final) {
-      transcriptArea.dataset.final = (transcriptArea.dataset.final || '') + final;
-    }
+    if (final) transcriptArea.dataset.final = (transcriptArea.dataset.final||'')+final;
 
-    const fullText = (transcriptArea.dataset.final || '') + interim;
+    const fullText = (transcriptArea.dataset.final||'')+interim;
 
-    // Update transcript display
-    transcriptArea.className = 'transcript-area has-text';
-    const finalSpan = document.createTextNode(transcriptArea.dataset.final || '');
-    const interimEl = document.createElement('span');
-    interimEl.className = 'interim';
-    interimEl.textContent = interim;
+    // Update transcript
+    transcriptArea.className = 'transcript-area has-text' + (LANGS[currentLang].rtl?' rtl':'');
     transcriptArea.innerHTML = '';
-    transcriptArea.appendChild(finalSpan);
-    if (interim) transcriptArea.appendChild(interimEl);
+    transcriptArea.appendChild(document.createTextNode(transcriptArea.dataset.final||''));
+    if (interim) {
+      const s = document.createElement('span');
+      s.className = 'interim';
+      s.textContent = interim;
+      transcriptArea.appendChild(s);
+    }
 
-    // Parse and display
+    // Parse & display inline
     const expr = wordsToExpr(fullText);
     if (expr) {
-      expressionBar.textContent = expr;
-      expressionBar.className = 'expression-bar';
-
+      expressionText.textContent = expr;
+      expressionText.className = 'expression-text';
       const res = evalExpr(expr);
       if (res !== null) {
-        resultValue.textContent = res;
-        resultValue.className = 'result-value';
+        inlineResult.textContent = res;
+        inlineResult.className = 'inline-result visible';
+        equalsSign.className = 'equals-sign visible';
       } else {
-        resultValue.textContent = '...';
-        resultValue.style.color = 'var(--dim)';
-        resultValue.style.fontSize = '14px';
-        resultValue.style.fontFamily = "'Share Tech Mono'";
-        resultValue.style.textShadow = 'none';
-        resultValue.style.fontWeight = '400';
+        inlineResult.textContent = '';
+        inlineResult.className = 'inline-result';
+        equalsSign.className = 'equals-sign';
       }
     }
 
-    // When final result is confirmed, add to history
     if (final && expr) {
       const res = evalExpr(expr);
-      if (res !== null) {
-        addToHistory(expr, res);
-        statusDot.className = 'status-dot active';
-      }
+      if (res !== null) { addToHistory(expr, res); statusDot.className='status-dot active'; }
     }
   };
 }
-
-let recognitionError = false;
 
 function toggleMic() {
   if (!SpeechRecognition) return;
@@ -833,13 +886,9 @@ async function requestMicAndStart() {
     stream.getTracks().forEach(t => t.stop());
     startMic();
   } catch (err) {
-    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-      showPermissionHelp();
-    } else if (err.name === 'NotFoundError') {
-      showToast('NO MICROPHONE FOUND — PLUG ONE IN');
-    } else {
-      showToast('MIC ERROR: ' + (err.name || 'UNKNOWN').toUpperCase());
-    }
+    if (err.name==='NotAllowedError'||err.name==='PermissionDeniedError') showPermissionHelp();
+    else if (err.name==='NotFoundError') showToast('NO MICROPHONE FOUND');
+    else showToast('MIC ERROR: '+(err.name||'UNKNOWN').toUpperCase());
   }
 }
 
@@ -855,49 +904,41 @@ function stopMic() {
   animateWave(false);
   statusDot.className = 'status-dot';
   micBtn.classList.remove('recording');
-  micLabel.textContent = 'ACTIVATE MICROPHONE';
+  micLabel.textContent = UI_STRINGS[currentLang].activate;
 }
 
 function clearAll() {
-  stopMic();
-  transcriptArea.innerHTML = '<span style="color:var(--dim);font-size:12px;">— awaiting voice input —</span>';
+  if (isRecording) stopMic();
+  const s = UI_STRINGS[currentLang];
+  transcriptArea.innerHTML = `<span style="color:var(--dim);font-size:12px;font-family:${LANGS[currentLang].rtl?"'Cairo',sans-serif":"'Share Tech Mono',monospace"}" id="awaitMsg">${s.await}</span>`;
   transcriptArea.dataset.final = '';
-  transcriptArea.className = 'transcript-area';
-  expressionBar.textContent = 'expression will appear here';
-  expressionBar.className = 'expression-bar empty';
-  resultValue.textContent = '—';
-  resultValue.className = 'result-value';
-  resultValue.style.color = 'var(--dim)';
-  resultValue.style.fontSize = '14px';
-  resultValue.style.fontFamily = "'Share Tech Mono'";
-  resultValue.style.textShadow = 'none';
-  resultValue.style.fontWeight = '400';
+  transcriptArea.className = 'transcript-area'+(LANGS[currentLang].rtl?' rtl':'');
+  expressionText.textContent = s.exprPlaceholder;
+  expressionText.className = 'expression-text empty';
+  inlineResult.className = 'inline-result';
+  equalsSign.className = 'equals-sign';
 }
 
 function copyResult() {
-  const val = resultValue.textContent;
-  if (!val || val === '—' || val === '...') {
-    showToast('NOTHING TO COPY');
-    return;
-  }
-  navigator.clipboard.writeText(val).then(() => showToast('COPIED: ' + val));
+  const val = inlineResult.textContent;
+  if (!val || val==='—') { showToast('NOTHING TO COPY'); return; }
+  navigator.clipboard.writeText(val).then(()=>showToast('COPIED: '+val));
 }
 
 function addToHistory(expr, result) {
-  // Avoid duplicate consecutive entries
-  if (history.length && history[0].expr === expr) return;
-  history.unshift({ expr, result });
-  if (history.length > 20) history.pop();
+  if (history.length && history[0].expr===expr) return;
+  history.unshift({expr,result});
+  if (history.length>20) history.pop();
   renderHistory();
 }
 
 function renderHistory() {
-  histCount.textContent = history.length + ' ENTR' + (history.length === 1 ? 'Y' : 'IES');
+  histCount.textContent = history.length+' ENTR'+(history.length===1?'Y':'IES');
   if (!history.length) {
-    historyList.innerHTML = '<div class="history-empty">no calculations yet</div>';
+    historyList.innerHTML = `<div class="history-empty">${UI_STRINGS[currentLang].histEmpty}</div>`;
     return;
   }
-  historyList.innerHTML = history.map((h, i) =>
+  historyList.innerHTML = history.map((h,i)=>
     `<div class="history-item" onclick="restoreHistory(${i})">
       <span class="history-expr">${h.expr}</span>
       <span class="history-result">= ${h.result}</span>
@@ -907,48 +948,21 @@ function renderHistory() {
 
 function restoreHistory(i) {
   const h = history[i];
-  expressionBar.textContent = h.expr;
-  expressionBar.className = 'expression-bar';
-  resultValue.textContent = h.result;
-  resultValue.className = 'result-value';
+  expressionText.textContent = h.expr;
+  expressionText.className = 'expression-text';
+  inlineResult.textContent = h.result;
+  inlineResult.className = 'inline-result visible';
+  equalsSign.className = 'equals-sign visible';
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  setTimeout(()=>t.classList.remove('show'), 2800);
 }
-
-function showPermissionHelp() {
-  document.getElementById('permModal').style.display = 'flex';
-}
-function closePermModal() {
-  document.getElementById('permModal').style.display = 'none';
-}
-
-// Init flat waveform
-animateWave(false);
+function showPermissionHelp() { document.getElementById('permModal').style.display='flex'; }
+function closePermModal()     { document.getElementById('permModal').style.display='none'; }
 </script>
-
-<!-- Permission Help Modal -->
-<div id="permModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:500; align-items:center; justify-content:center; padding:20px;">
-  <div style="background:#0d1318; border:1px solid #ff6b35; border-radius:6px; max-width:400px; width:100%; padding:28px; font-family:'Share Tech Mono',monospace; position:relative;">
-    <div style="position:absolute; top:0; left:0; width:14px; height:14px; border-top:1px solid #ff6b35; border-left:1px solid #ff6b35;"></div>
-    <div style="position:absolute; bottom:0; right:0; width:14px; height:14px; border-bottom:1px solid #ff6b35; border-right:1px solid #ff6b35;"></div>
-    <div style="font-family:'Orbitron',sans-serif; font-size:12px; color:#ff6b35; letter-spacing:3px; margin-bottom:18px; text-shadow:0 0 10px rgba(255,107,53,0.4);">&#9888; MIC ACCESS BLOCKED</div>
-    <div style="font-size:12px; color:#c8dde8; line-height:2;">Your browser is blocking microphone access. To fix:</div>
-    <div style="margin-top:14px; font-size:11px; color:#3a5566; line-height:2.4;">
-      <div><span style="color:#00e5ff;">1.</span> Look for a lock or mic icon in your address bar</div>
-      <div><span style="color:#00e5ff;">2.</span> Click it &rarr; set Microphone to <span style="color:#7fff6b;">Allow</span></div>
-      <div><span style="color:#00e5ff;">3.</span> Reload the page and try again</div>
-      <div style="margin-top:10px;"><span style="color:#00e5ff;">Chrome:</span> Settings &rarr; Privacy &rarr; Site Settings &rarr; Mic</div>
-      <div><span style="color:#00e5ff;">Firefox:</span> Click lock in address bar &rarr; Permissions &rarr; Mic</div>
-      <div><span style="color:#00e5ff;">Safari:</span> Settings &rarr; Websites &rarr; Microphone &rarr; Allow</div>
-    </div>
-    <button onclick="closePermModal()" style="margin-top:22px; width:100%; padding:12px; background:transparent; border:1px solid #1e3040; border-radius:4px; color:#00e5ff; font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:2px; cursor:pointer;">CLOSE</button>
-  </div>
-</div>
-
 </body>
 </html>
